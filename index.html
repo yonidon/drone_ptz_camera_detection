@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Drone Detection</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static_files', filename='style.css') }}">
+</head>
+<body>
+    <h1>Drone Detection Live Feed</h1>
+    <div class="container">
+        <img src="{{ url_for('video_feed') }}">
+        <div class="doa-circle" id="doaCircle">
+            <div class="doa-line" id="doaLinePan"></div>
+            <div class="doa-line-tilt" id="doaLineTilt"></div>
+        </div>
+    </div>
+    <div id="tourSection">
+        <button id="startTourButton" onclick="handleTourButton('start')">Start Tour</button>
+        <button id="stopTourButton" onclick="handleTourButton('stop')">Stop Tour</button>
+      </div>
+      
+    <div class="instructions">
+        <p>Press arrow keys to move camera</p>
+        <p>Press + and - keys to zoom in and out</p>
+    </div>
+    <audio id="warningSound" src="{{ url_for('static_files', filename='warning.mp3') }}" preload="auto"></audio>
+    <script>
+        var lastSoundPlayTime = 0;
+        function updateDoaLines(doaPan, doaTilt) {
+            var doaLinePan = document.getElementById('doaLinePan');
+            var doaLineTilt = document.getElementById('doaLineTilt');
+            doaLinePan.style.transform = 'rotate(' + doaPan + 'deg)';
+            doaLineTilt.style.transform = 'rotate(' + doaTilt + 'deg)';
+        }
+
+        function fetchDoa() {
+            fetch('/get_doa')
+                .then(response => response.json())
+                .then(data => {
+                    updateDoaLines(data.doa_pan, data.doa_tilt);
+                    if (data.doa_pan !== 0 || data.doa_tilt !== 0) {
+                        playWarningSound();
+                    }
+                })
+                .catch(error => console.error('Error fetching DOA:', error));
+        }
+
+        // Fetch DOA value every second
+        setInterval(fetchDoa, 1000);
+
+        // Function to move the camera
+        function moveCamera(direction, action) {
+            fetch('/move_camera', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ direction: direction, action: action })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status !== 'success') {
+                    console.error('Error moving camera:', data.status);
+                }
+            })
+            .catch(error => console.error('Error moving camera:', error));
+        }
+
+        // Function to zoom the camera
+        function zoomCamera(zoomType) {
+            fetch('/zoom_camera', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ zoomType: zoomType })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status !== 'success') {
+                    console.error('Error zooming camera:', data.status);
+                }
+            })
+            .catch(error => console.error('Error zooming camera:', error));
+        }
+
+        function playWarningSound() {
+            var currentTime = Date.now();
+            if (currentTime - lastSoundPlayTime >= 5000) {  // 5000 milliseconds = 5 seconds
+                var sound = document.getElementById('warningSound');
+                sound.play();
+                lastSoundPlayTime = currentTime;
+            }
+        }
+        function handleTourButton(action) {
+            let startButton = document.getElementById('startTourButton');
+            let stopButton = document.getElementById('stopTourButton');
+            
+            if (action === 'start') {
+            startButton.style.backgroundColor = 'green';
+            stopButton.style.backgroundColor = 'red';
+            } else if (action === 'stop') {
+            startButton.style.backgroundColor = 'red';
+            stopButton.style.backgroundColor = 'green';
+            }
+
+            fetch('/tour', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ action: action })
+            })
+            .then(response => response.json())
+            .then(data => {
+            if (data.status !== 'success') {
+                console.error('Error with tour action:', data.status);
+            }
+            })
+            .catch(error => console.error('Error with tour action:', error));
+        }
+        // Event listener for key presses
+        document.addEventListener('keydown', function(event) {
+            switch(event.key) {
+                case 'ArrowUp':
+                    moveCamera('up', 'start');
+                    break;
+                case 'ArrowDown':
+                    moveCamera('down', 'start');
+                    break;
+                case 'ArrowLeft':
+                    moveCamera('left', 'start');
+                    break;
+                case 'ArrowRight':
+                    moveCamera('right', 'start');
+                    break;
+                case '+':
+                    zoomCamera('ZoomTele');
+                    break;
+                case '-':
+                    zoomCamera('ZoomWide');
+                    break;
+            }
+        });
+
+        // Event listener for key releases
+        document.addEventListener('keyup', function(event) {
+            switch(event.key) {
+                case 'ArrowUp':
+                case 'ArrowDown':
+                case 'ArrowLeft':
+                case 'ArrowRight':
+                    moveCamera(event.key.replace('Arrow', '').toLowerCase(), 'stop');
+                    break;
+            }
+        });
+
+    </script>
+</body>
+</html>

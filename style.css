@@ -1,0 +1,83 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #87CEEB; /* Sky blue background */
+    color: #333;
+    text-align: center;
+    padding: 20px;
+}
+
+h1 {
+    color: #FFF;
+    text-shadow: 2px 2px 4px #000;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+img {
+    border: 5px solid #FFF;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    max-width: 600px; /* Optional max-width to control the image size */
+}
+
+.doa-circle {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    border: 5px solid #FFF;
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    background-color: rgba(255, 255, 255, 0.8); /* Slightly transparent background */
+}
+
+.doa-line {
+    position: absolute;
+    width: 2px;
+    height: 50%;
+    background-color: red;
+    transform-origin: bottom center;
+    bottom: 50%;
+    left: 50%;
+}
+
+.doa-line-tilt {
+    position: absolute;
+    width: 2px;
+    height: 50%;
+    background-color: blue;
+    transform-origin: bottom center;
+    bottom: 50%;
+    left: 50%;
+}
+
+.instructions {
+    color: #FFF;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius: 5px;
+    display: inline-block;
+    margin-top: 20px;
+}
+#tourSection {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  #startTourButton, #stopTourButton {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  #startTourButton:hover, #stopTourButton:hover {
+    background-color: #0056b3;
+  }
